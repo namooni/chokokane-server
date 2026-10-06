@@ -1,7 +1,5 @@
 package com.example.chokokane.controller.user;
 
-import java.time.Duration;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +18,7 @@ import com.example.chokokane.dto.user.LoginResponse;
 import com.example.chokokane.dto.user.LoginResult;
 import com.example.chokokane.dto.user.SignupRequest;
 import com.example.chokokane.dto.user.UserResponse;
+import com.example.chokokane.security.RefreshTokenCookieProvider;
 import com.example.chokokane.service.user.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,9 +30,13 @@ import jakarta.validation.Valid;
 public class UserController {
 
   private UserService userService;
+  private RefreshTokenCookieProvider refreshTokenCookieProvider;
 
-  public UserController(UserService userService) {
+  public UserController(
+      UserService userService,
+      RefreshTokenCookieProvider refreshTokenCookieProvider) {
     this.userService = userService;
+    this.refreshTokenCookieProvider = refreshTokenCookieProvider;
   }
 
   @Operation(summary = "회원가입", description = "회원가입합니다.")
@@ -52,13 +55,7 @@ public class UserController {
 
     LoginResult result = userService.login(request);
 
-    ResponseCookie cookie = ResponseCookie.from(
-        "refreshToken",
-        result.getRefreshToken())
-        .httpOnly(true)
-        .path("/")
-        .maxAge(Duration.ofDays(30))
-        .build();
+    ResponseCookie cookie = refreshTokenCookieProvider.create(result.getRefreshToken());
 
     LoginResponse response = new LoginResponse(result.getAccessToken());
 
@@ -76,13 +73,7 @@ public class UserController {
 
     userService.logout(userId);
 
-    ResponseCookie cookie = ResponseCookie.from(
-        "refreshToken",
-        "")
-        .httpOnly(true)
-        .path("/")
-        .maxAge(0)
-        .build();
+    ResponseCookie cookie = refreshTokenCookieProvider.delete();
 
     return ResponseEntity
         .ok()
@@ -96,13 +87,7 @@ public class UserController {
       @CookieValue("refreshToken") String refreshToken) {
     RefreshResult result = userService.refresh(refreshToken);
 
-    ResponseCookie cookie = ResponseCookie.from(
-        "refreshToken",
-        result.getRefreshToken())
-        .httpOnly(true)
-        .path("/")
-        .maxAge(Duration.ofDays(30))
-        .build();
+    ResponseCookie cookie = refreshTokenCookieProvider.create(result.getRefreshToken());
 
     RefreshTokenResponse response = new RefreshTokenResponse(result.getAccessToken());
 
