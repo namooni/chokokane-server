@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.chokokane.mapper.expense.ExpenseMapper">
+    <sql id="expenseFilters">
+        <where>
+            user_id = #{userId}
+
+            <if test="categories != null and !categories.isEmpty()">
+                AND category IN
+                <foreach
+                    collection="categories"
+                    item="category"
+                    open="("
+                    separator=","
+                    close=")"
+                >
+                    #{category}
+                </foreach>
+            </if>
+            <if test="minAmount != null">
+                AND amount >= #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                AND amount &lt;= #{maxAmount}
+            </if>
+        </where>
+    </sql>
+
+    <resultMap
+        id="expenseResultMap"
+        type="com.example.chokokane.model.expense.Expense"
+    >
+        <id column="id" property="id" />
+        <result column="amount" property="amount" />
+        <result column="category" property="category" />
+        <result column="memo" property="memo" />
+        <result column="expense_date" property="expenseDate" />
+        <result column="expense_time" property="expenseTime" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <insert
+      id="save"
+      useGeneratedKeys="true"
+      keyProperty="expense.id"
+    >
+        INSERT INTO expenses (
+            user_id,
+            category,
+            amount,
+            memo,
+            expense_date,
+            expense_time,
+            created_at
+        )
+        VALUES (
+            #{userId},
+            #{expense.category},
+            #{expense.amount},
+            #{expense.memo},
+            #{expense.expenseDate},
+            #{expense.expenseTime},
+            #{expense.createdAt}
+        )
+    </insert>
+
+    <select
+      id="findAll"
+      resultMap="expenseResultMap"
+    >
+        SELECT
+            id,
+            amount,
+            category,
+            memo,
+            expense_date,
+            expense_time,
+            created_at
+        FROM expenses
+        <include refid="expenseFilters" />
+        <choose>
+            <when test='sort == "latest"'>
+                ORDER BY created_at DESC
+            </when>
+            <when test='sort == "oldest"'>
+                ORDER BY created_at ASC
+            </when>
+            <when test='sort == "highest"'>
+                ORDER BY amount DESC
+            </when>
+            <when test='sort == "lowest"'>
+                ORDER BY amount ASC
+            </when>
+            <otherwise>
+                ORDER BY created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select
+        id="getExpenseCount"
+        resultType="int"
+    >
+        SELECT COUNT(*)
+        FROM expenses
+        <include refid="expenseFilters" />
+    </select>
+
+    <select
+        id="getTotalAmount"
+        resultType="int"
+    >
+        SELECT COALESCE(SUM(amount), 0)
+        FROM expenses
+        <include refid="expenseFilters" />
+    </select>
+
+    <select
+      id="findById"
+      resultMap="expenseResultMap"
+    >
+        SELECT 
+            id,
+            amount,
+            category,
+            memo,
+            expense_date,
+            expense_time,
+            created_at
+        FROM expenses
+        WHERE id = #{id}
+            AND user_id = #{userId}
+    </select>
+
+    <update id="update">
+        UPDATE expenses
+        SET
+            amount = #{expense.amount},
+            category = #{expense.category},
+            memo = #{expense.memo},
+            expense_date = #{expense.expenseDate},
+            expense_time = #{expense.expenseTime}
+        WHERE id = #{expense.id}
+            AND user_id = #{userId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM expenses
+        WHERE id = #{id}
+            AND user_id = #{userId}
+    </delete>
+</mapper>

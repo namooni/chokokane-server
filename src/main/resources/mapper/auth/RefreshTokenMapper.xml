@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.chokokane.mapper.auth.RefreshTokenMapper">
+    <resultMap
+      id="refreshTokenResultMap"
+      type="com.example.chokokane.model.auth.RefreshToken"
+    >
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="token" property="token" />
+        <result column="expires_at" property="expiresAt" />
+    </resultMap>
+
+    <select
+      id="findByUserId"
+      resultMap="refreshTokenResultMap"
+    >
+        SELECT id, user_id, token, expires_at
+        FROM refresh_tokens
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert
+      id="save"
+
+    >
+        INSERT INTO refresh_tokens (
+            user_id,
+            token,
+            expires_at
+        )
+        VALUES (
+            #{userId},
+            #{token},
+            #{expiresAt}
+        )
+        ON DUPLICATE KEY UPDATE
+            token = #{token},
+            expires_at = #{expiresAt}
+    </insert>
+
+    <delete id="deleteByUserId">
+        DELETE FROM refresh_tokens
+        WHERE user_id = #{userId}
+    </delete>
+</mapper>

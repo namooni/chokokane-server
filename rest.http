@@ -1,0 +1,72 @@
+POST http://localhost:8080/expenses
+Content-Type: application/json
+
+{
+  "amount": 251000,
+  "category": "Food",
+  "memo": "Sushi",
+  "expenseDate": "2026-09-29"
+}
+
+###
+
+GET http://localhost:8080/expenses
+
+###
+
+GET http://localhost:8080/total_amount
+
+###
+
+GET http://localhost:8080/expense/51
+
+###
+
+PUT http://localhost:8080/expenses/30
+Content-Type: application/json
+
+{
+    "id": 99999,
+    "amount": 2000,
+    "category": "Food",
+    "memo": "asd"
+}
+
+###
+
+DELETE http://localhost:8080/expenses/44
+
+###
+
+GET http://localhost:8080/expenses?categories=Transport,Food&min_amount=1000&max_amount=25000
+
+###
+
+GET http://localhost:8080/expenses?page=0&size=10
+
+###
+
+PUT http://localhost:8080/expenses_category
+Content-Type: application/json
+
+{
+    "oldCategory": "Transport",
+    "newCategory": "Food"
+}
+
+###
+
+POST http://localhost:8080/expenses
+Content-Type: application/json
+
+{
+  "amount": 191,
+  "category": "Food",
+  "memo": "Sushi",
+  "expenseDate": null,
+  "expenseTime": "19:30"
+}
+
+###
+
+GET http://localhost:8080/environment
