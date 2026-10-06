@@ -15,7 +15,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import com.example.chokokane.dto.auth.RefreshResult;
-import com.example.chokokane.dto.auth.RefreshTokenResponse;
 import com.example.chokokane.dto.user.LoginRequest;
 import com.example.chokokane.dto.user.LoginResult;
 import com.example.chokokane.dto.user.SignupRequest;

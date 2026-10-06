@@ -1,4 +1,4 @@
-package com.example.chokokane.config;
+package com.example.chokokane.security;
 
 import java.util.Base64;
 
