@@ -48,19 +48,19 @@ jobs:
             --instance-ids "i-0d68a02994d272a11" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
-            "set -e",
-            "aws s3 cp s3://chokokane-server-deploy-174135521834/chokokane-server.jar /opt/chokokane/chokokane-server.jar.new",
-            "chown ec2-user:ec2-user /opt/chokokane/chokokane-server.jar.new",
-            "mv /opt/chokokane/chokokane-server.jar.new /opt/chokokane/chokokane-server.jar",
-            "systemctl restart chokokane",
-            "systemctl is-active --quiet chokokane"
+              "set -e",
+              "aws s3 cp s3://chokokane-server-deploy-174135521834/chokokane-server.jar /opt/chokokane/chokokane-server.jar.new",
+              "chown ec2-user:ec2-user /opt/chokokane/chokokane-server.jar.new",
+              "mv /opt/chokokane/chokokane-server.jar.new /opt/chokokane/chokokane-server.jar",
+              "systemctl restart chokokane",
+              "systemctl is-active --quiet chokokane"
             ]' \
             --query "Command.CommandId" \
             --output text)
 
           echo "SSM Command ID: $COMMAND_ID"
 
-          aws ssm wait command-excuted \
+          aws ssm wait command-executed \
             --command-id "$COMMAND_ID" \
             --instance-id "i-0d68a02994d272a11"
 
