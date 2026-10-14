@@ -7,7 +7,7 @@ import java.time.LocalTime;
 public class Expense {
   private Long id;
   private int amount;
-  private String category;
+  private Long categoryId;
   private String memo;
   private LocalDate expenseDate;
   private LocalTime expenseTime;
@@ -16,14 +16,14 @@ public class Expense {
   public Expense(
       Long id,
       int amount,
-      String category,
+      Long categoryId,
       String memo,
       LocalDate expenseDate,
       LocalTime expenseTime,
       LocalDateTime createdAt) {
     this.id = id;
     this.amount = amount;
-    this.category = category;
+    this.categoryId = categoryId;
     this.memo = memo;
     this.expenseDate = expenseDate;
     this.expenseTime = expenseTime;
@@ -42,8 +42,8 @@ public class Expense {
     return amount;
   }
 
-  public String getCategory() {
-    return category;
+  public Long getCategoryId() {
+    return categoryId;
   }
 
   public String getMemo() {
@@ -64,12 +64,12 @@ public class Expense {
 
   public void update(
       int amount,
-      String category,
+      Long categoryId,
       String memo,
       LocalDate expenseDate,
       LocalTime expenseTime) {
     this.amount = amount;
-    this.category = category;
+    this.categoryId = categoryId;
     this.memo = memo;
     this.expenseDate = expenseDate;
     this.expenseTime = expenseTime;

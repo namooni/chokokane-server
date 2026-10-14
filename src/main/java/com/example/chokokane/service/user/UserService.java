@@ -13,19 +13,21 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chokokane.dto.auth.RefreshResult;
 import com.example.chokokane.dto.user.LoginRequest;
 import com.example.chokokane.dto.user.LoginResult;
 import com.example.chokokane.dto.user.SignupRequest;
 import com.example.chokokane.dto.user.UserResponse;
-import com.example.chokokane.exception.auth.InvalidRefreshTokenException;
-import com.example.chokokane.exception.user.DuplicateEmailException;
-import com.example.chokokane.exception.user.LoginFailedException;
+import com.example.chokokane.exception.ConflictException;
+import com.example.chokokane.exception.InvalidRefreshTokenException;
+import com.example.chokokane.exception.LoginFailedException;
 import com.example.chokokane.model.auth.RefreshToken;
 import com.example.chokokane.model.user.User;
 import com.example.chokokane.repository.auth.RefreshTokenRepository;
 import com.example.chokokane.repository.user.UserRepository;
+import com.example.chokokane.service.category.CategoryService;
 
 @Service
 public class UserService {
@@ -35,24 +37,29 @@ public class UserService {
   private final JwtDecoder refreshJwtDecoder;
   private final RefreshTokenRepository refreshTokenRepository;
 
+  private final CategoryService categoryService;
+
   public UserService(
       UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       JwtEncoder jwtEncoder,
       @Qualifier("refreshJwtDecoder") JwtDecoder refreshJwtDecoder,
-      RefreshTokenRepository refreshTokenRepository) {
+      RefreshTokenRepository refreshTokenRepository,
+      CategoryService categoryService) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtEncoder = jwtEncoder;
     this.refreshJwtDecoder = refreshJwtDecoder;
     this.refreshTokenRepository = refreshTokenRepository;
+    this.categoryService = categoryService;
   }
 
+  @Transactional
   public UserResponse signUp(SignupRequest request) {
     User existingUser = userRepository.findByEmail(request.getEmail());
 
     if (existingUser != null) {
-      throw new DuplicateEmailException("Email already exists.");
+      throw new ConflictException("Email already exists.");
     }
 
     String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -64,6 +71,8 @@ public class UserService {
         encodedPassword);
 
     userRepository.save(user);
+
+    categoryService.createDefaultCategories(user.getId());
 
     return new UserResponse(user.getId(), user.getName(), user.getEmail());
   }
