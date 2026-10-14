@@ -1,4 +1,4 @@
-package com.example.chokokane.exception.auth;
+package com.example.chokokane.exception;
 
 public class InvalidRefreshTokenException extends RuntimeException {
 
