@@ -4,17 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.example.chokokane.exception.auth.InvalidRefreshTokenException;
-import com.example.chokokane.exception.expense.ExpenseNotFoundException;
-import com.example.chokokane.exception.user.DuplicateEmailException;
-import com.example.chokokane.exception.user.LoginFailedException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -30,9 +26,9 @@ public class GlobalExceptionHandler {
             e.getMessage()));
   }
 
-  @ExceptionHandler(DuplicateEmailException.class)
-  public ResponseEntity<ApiError> handleDuplication(
-      DuplicateEmailException e) {
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<ApiError> handleConflict(
+      ConflictException e) {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(
         new ApiError(
             HttpStatus.CONFLICT.value(),
@@ -48,9 +44,18 @@ public class GlobalExceptionHandler {
             e.getMessage()));
   }
 
-  @ExceptionHandler(ExpenseNotFoundException.class)
-  public ResponseEntity<ApiError> handleExpenseNotFound(
-      ExpenseNotFoundException e) {
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ApiError> handleBadRequest(
+      BadRequestException e) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        new ApiError(
+            HttpStatus.BAD_REQUEST.value(),
+            e.getMessage()));
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ResponseEntity<ApiError> handleNotFound(
+      NotFoundException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
         new ApiError(
             HttpStatus.NOT_FOUND.value(),

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.chokokane.mapper.expense.ExpenseMapper;
 import com.example.chokokane.model.expense.Expense;
+import com.example.chokokane.model.expense.ExpenseDetail;
 
 @Repository
 public class MyBatisExpenseRepository implements ExpenseRepository {
@@ -17,9 +18,9 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
   }
 
   @Override
-  public List<Expense> findAll(
+  public List<ExpenseDetail> findAll(
       Long userId,
-      List<String> categories,
+      List<Long> categoryIds,
       Integer minAmount,
       Integer maxAmount,
       String sort,
@@ -27,7 +28,7 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
       int size) {
     return expenseMapper.findAll(
         userId,
-        categories,
+        categoryIds,
         minAmount,
         maxAmount,
         sort,
@@ -36,14 +37,14 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
   }
 
   @Override
-  public int getExpenseCount(
+  public int getTotalElements(
       Long userId,
-      List<String> categories,
+      List<Long> categoryIds,
       Integer minAmount,
       Integer maxAmount) {
-    return expenseMapper.getExpenseCount(
+    return expenseMapper.getTotalElements(
         userId,
-        categories,
+        categoryIds,
         minAmount,
         maxAmount);
   }
@@ -51,12 +52,12 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
   @Override
   public int getTotalAmount(
       Long userId,
-      List<String> categories,
+      List<Long> categoryIds,
       Integer minAmount,
       Integer maxAmount) {
     return expenseMapper.getTotalAmount(
         userId,
-        categories,
+        categoryIds,
         minAmount,
         maxAmount);
   }
@@ -75,11 +76,6 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
   @Override
   public int update(Long userId, Expense expense) {
     return expenseMapper.update(userId, expense);
-  }
-
-  @Override
-  public int updateCategory(String oldCategory, String newCategory) {
-    return expenseMapper.updateCategory(oldCategory, newCategory);
   }
 
   @Override

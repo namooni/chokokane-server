@@ -1,4 +1,4 @@
-package com.example.chokokane.exception.user;
+package com.example.chokokane.exception;
 
 public class LoginFailedException extends RuntimeException {
 

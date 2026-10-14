@@ -6,28 +6,43 @@
 <mapper namespace="com.example.chokokane.mapper.expense.ExpenseMapper">
     <sql id="expenseFilters">
         <where>
-            user_id = #{userId}
+            e.user_id = #{userId}
 
-            <if test="categories != null and !categories.isEmpty()">
-                AND category IN
+            <if test="categoryIds != null and !categoryIds.isEmpty()">
+                AND e.category_id IN
                 <foreach
-                    collection="categories"
-                    item="category"
+                    collection="categoryIds"
+                    item="categoryId"
                     open="("
                     separator=","
                     close=")"
                 >
-                    #{category}
+                    #{categoryId}
                 </foreach>
             </if>
             <if test="minAmount != null">
-                AND amount >= #{minAmount}
+                AND e.amount >= #{minAmount}
             </if>
             <if test="maxAmount != null">
-                AND amount &lt;= #{maxAmount}
+                AND e.amount &lt;= #{maxAmount}
             </if>
         </where>
     </sql>
+
+    <resultMap
+        id="expenseDetailResultMap"
+        type="com.example.chokokane.model.expense.ExpenseDetail"
+    >
+        <id column="id" property="id" />
+        <result column="amount" property="amount" />
+        <result column="category_id" property="categoryId" />
+        <result column="category_name" property="categoryName" />
+        <result column="category_color" property="categoryColor" />
+        <result column="memo" property="memo" />
+        <result column="expense_date" property="expenseDate" />
+        <result column="expense_time" property="expenseTime" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
 
     <resultMap
         id="expenseResultMap"
@@ -35,7 +50,7 @@
     >
         <id column="id" property="id" />
         <result column="amount" property="amount" />
-        <result column="category" property="category" />
+        <result column="category_id" property="categoryId" />
         <result column="memo" property="memo" />
         <result column="expense_date" property="expenseDate" />
         <result column="expense_time" property="expenseTime" />
@@ -49,7 +64,7 @@
     >
         INSERT INTO expenses (
             user_id,
-            category,
+            category_id,
             amount,
             memo,
             expense_date,
@@ -58,7 +73,7 @@
         )
         VALUES (
             #{userId},
-            #{expense.category},
+            #{expense.categoryId},
             #{expense.amount},
             #{expense.memo},
             #{expense.expenseDate},
@@ -69,44 +84,48 @@
 
     <select
       id="findAll"
-      resultMap="expenseResultMap"
+      resultMap="expenseDetailResultMap"
     >
         SELECT
-            id,
-            amount,
-            category,
-            memo,
-            expense_date,
-            expense_time,
-            created_at
-        FROM expenses
+            e.id,
+            e.amount,
+            e.category_id,
+            c.name AS category_name,
+            c.color AS category_color,
+            e.memo,
+            e.expense_date,
+            e.expense_time,
+            e.created_at
+        FROM expenses e
+        LEFT JOIN categories c
+            ON e.category_id = c.id
         <include refid="expenseFilters" />
         <choose>
             <when test='sort == "latest"'>
-                ORDER BY created_at DESC
+                ORDER BY e.created_at DESC, e.id DESC
             </when>
             <when test='sort == "oldest"'>
-                ORDER BY created_at ASC
+                ORDER BY e.created_at ASC, e.id ASC
             </when>
             <when test='sort == "highest"'>
-                ORDER BY amount DESC
+                ORDER BY e.amount DESC, e.id DESC
             </when>
             <when test='sort == "lowest"'>
-                ORDER BY amount ASC
+                ORDER BY e.amount ASC, e.id ASC
             </when>
             <otherwise>
-                ORDER BY created_at DESC
+                ORDER BY e.created_at DESC, e.id DESC
             </otherwise>
         </choose>
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <select
-        id="getExpenseCount"
+        id="getTotalElements"
         resultType="int"
     >
         SELECT COUNT(*)
-        FROM expenses
+        FROM expenses e
         <include refid="expenseFilters" />
     </select>
 
@@ -115,7 +134,7 @@
         resultType="int"
     >
         SELECT COALESCE(SUM(amount), 0)
-        FROM expenses
+        FROM expenses e
         <include refid="expenseFilters" />
     </select>
 
@@ -126,7 +145,7 @@
         SELECT 
             id,
             amount,
-            category,
+            category_id,
             memo,
             expense_date,
             expense_time,
@@ -140,7 +159,7 @@
         UPDATE expenses
         SET
             amount = #{expense.amount},
-            category = #{expense.category},
+            category_id = #{expense.categoryId},
             memo = #{expense.memo},
             expense_date = #{expense.expenseDate},
             expense_time = #{expense.expenseTime}
