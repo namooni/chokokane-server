@@ -4,17 +4,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
-import com.example.chokokane.dto.category.CategoryResponse;
 import com.example.chokokane.mapper.category.CategoryMapper;
 import com.example.chokokane.model.category.Category;
 
-import lombok.AllArgsConstructor;
-
 @Repository
-@AllArgsConstructor
 public class MyBatisCategoryRepository implements CategoryRepository {
 
   CategoryMapper categoryMapper;
+
+  public MyBatisCategoryRepository(CategoryMapper categoryMapper) {
+    this.categoryMapper = categoryMapper;
+  }
 
   @Override
   public List<Category> findActiveByUserId(Long userId) {

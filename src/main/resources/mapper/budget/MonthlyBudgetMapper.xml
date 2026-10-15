@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.chokokane.mapper.budget.MonthlyBudgetMapper">
+    <resultMap
+      id="monthlyBudgetResultMap"
+      type="com.example.chokokane.model.budget.MonthlyBudget"
+    >
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long" />
+            <arg column="user_id" javaType="java.lang.Long" />
+            <arg column="budget_month" javaType="java.time.LocalDate" />
+            <arg column="amount" javaType="java.lang.Integer" />
+            <arg column="created_at" javaType="java.time.LocalDateTime" />
+            <arg column="updated_at" javaType="java.time.LocalDateTime" />
+        </constructor>
+    </resultMap>
+
+    <select
+      id="findByUserIdAndMonth"
+      resultMap="monthlyBudgetResultMap"
+    >
+        SELECT id, user_id, budget_month, amount, created_at, updated_at
+        FROM monthly_budgets
+        WHERE user_id = #{userId}
+            AND budget_month = #{budgetMonth}
+    </select>
+
+    <insert id="upsert">
+        INSERT INTO monthly_budgets (
+            user_id,
+            budget_month,
+            amount,
+            created_at,
+            updated_at
+        )
+        VALUES (
+            #{userId},
+            #{budgetMonth},
+            #{amount},
+            UTC_TIMESTAMP(),
+            UTC_TIMESTAMP()
+        )
+        ON DUPLICATE KEY UPDATE
+            amount = #{amount},
+            updated_at = UTC_TIMESTAMP()
+    </insert>
+</mapper>

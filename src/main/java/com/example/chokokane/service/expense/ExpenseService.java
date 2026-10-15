@@ -1,6 +1,7 @@
 package com.example.chokokane.service.expense;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class ExpenseService {
         request.getMemo(),
         request.getExpenseDate(),
         request.getExpenseTime(),
-        LocalDateTime.now());
+        LocalDateTime.now(ZoneOffset.UTC));
     expenseRepository.save(userId, expense);
 
     log.info("Expense created. id={}, amount={}",
