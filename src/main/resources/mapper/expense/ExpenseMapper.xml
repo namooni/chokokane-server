@@ -133,9 +133,74 @@
         id="getTotalAmount"
         resultType="int"
     >
-        SELECT COALESCE(SUM(amount), 0)
+        SELECT COALESCE(SUM(e.amount), 0)
         FROM expenses e
         <include refid="expenseFilters" />
+    </select>
+
+    <select
+        id="getMonthlySpent"
+        resultType="Long"
+    >
+        SELECT COALESCE(SUM(e.amount), 0)
+        FROM expenses e
+        WHERE e.user_id = #{userId}
+            AND (
+                    (
+                        e.expense_date >= #{monthStart}
+                        AND e.expense_date &lt; #{nextMonthStart}
+                    )
+                    OR
+                    (
+                        e.expense_date IS NULL
+                        AND e.created_at >= #{createdAtStart}
+                        AND e.created_at &lt; #{createdAtEnd}
+                    )
+            )
+    </select>
+
+    <select
+        id="getTodaySpent"
+        resultType="Long"
+    >
+        SELECT COALESCE(SUM(e.amount), 0)
+        FROM expenses e
+        WHERE e.user_id = #{userId}
+            AND e.expense_date = #{today}
+    </select>
+
+    <select
+        id="findRecentByMonth"
+        resultMap="expenseDetailResultMap"
+    >
+        SELECT
+            e.id,
+            e.amount,
+            e.category_id,
+            c.name AS category_name,
+            c.color AS category_color,
+            e.memo,
+            e.expense_date,
+            e.expense_time,
+            e.created_at 
+        FROM expenses e
+        LEFT JOIN categories c
+            ON e.category_id = c.id
+        WHERE e.user_id = #{userId}
+            AND (
+                    (
+                        e.expense_date >= #{monthStart}
+                        AND e.expense_date &lt; #{nextMonthStart}
+                    )
+                    OR
+                    (
+                        e.expense_date IS NULL
+                        AND e.created_at >= #{createdAtStart}
+                        AND e.created_at &lt; #{createdAtEnd}
+                    )
+            )
+        ORDER BY e.created_at DESC, e.id DESC
+        LIMIT 5
     </select>
 
     <select

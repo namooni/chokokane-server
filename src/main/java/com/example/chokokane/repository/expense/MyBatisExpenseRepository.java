@@ -1,5 +1,7 @@
 package com.example.chokokane.repository.expense;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -60,6 +62,43 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
         categoryIds,
         minAmount,
         maxAmount);
+  }
+
+  @Override
+  public Long getMonthlySpent(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd) {
+    return expenseMapper.getMonthlySpent(
+        userId,
+        monthStart,
+        nextMonthStart,
+        createdAtStart,
+        createdAtEnd);
+  }
+
+  @Override
+  public List<ExpenseDetail> findRecentByMonth(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd) {
+    return expenseMapper.findRecentByMonth(
+        userId,
+        monthStart,
+        nextMonthStart,
+        createdAtStart,
+        createdAtEnd);
+  }
+
+  @Override
+  public Long getTodaySpent(
+      Long userId,
+      LocalDate today) {
+    return expenseMapper.getTodaySpent(userId, today);
   }
 
   @Override
