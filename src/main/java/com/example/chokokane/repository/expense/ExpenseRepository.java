@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.chokokane.model.analytics.CategoryExpenseTotal;
+import com.example.chokokane.model.analytics.DailyCategoryExpenseTotal;
 import com.example.chokokane.model.expense.Expense;
 import com.example.chokokane.model.expense.ExpenseDetail;
+import com.example.chokokane.model.history.HistoryCursor;
 
 public interface ExpenseRepository {
 
@@ -41,12 +44,49 @@ public interface ExpenseRepository {
       Long userId,
       LocalDate today);
 
+  List<CategoryExpenseTotal> getCategoryTotalByMonth(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd);
+
+  List<DailyCategoryExpenseTotal> getDailyCategoryTotalsByMonth(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart);
+
+  Long getUndatedSpentByMonth(
+      Long userId,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd);
+
   List<ExpenseDetail> findRecentByMonth(
       Long userId,
       LocalDate monthStart,
       LocalDate nextMonthStart,
       LocalDateTime createdAtStart,
       LocalDateTime createdAtEnd);
+
+  Long getHistoryFilteredTotal(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd,
+      Long categoryId,
+      boolean undated);
+
+  List<ExpenseDetail> findHistory(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd,
+      Long categoryId,
+      boolean undated,
+      HistoryCursor cursor,
+      int limit);
 
   Expense findById(Long userId, Long id);
 

@@ -7,8 +7,11 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.chokokane.model.analytics.CategoryExpenseTotal;
+import com.example.chokokane.model.analytics.DailyCategoryExpenseTotal;
 import com.example.chokokane.model.expense.Expense;
 import com.example.chokokane.model.expense.ExpenseDetail;
+import com.example.chokokane.model.history.HistoryCursor;
 
 @Mapper
 public interface ExpenseMapper {
@@ -49,12 +52,49 @@ public interface ExpenseMapper {
       @Param("userId") Long userId,
       @Param("today") LocalDate today);
 
+  List<CategoryExpenseTotal> getCategoryTotalByMonth(
+      @Param("userId") Long userId,
+      @Param("monthStart") LocalDate monthStart,
+      @Param("nextMonthStart") LocalDate nextMonthStart,
+      @Param("createdAtStart") LocalDateTime createdAtStart,
+      @Param("createdAtEnd") LocalDateTime createdAtEnd);
+
+  List<DailyCategoryExpenseTotal> getDailyCategoryTotalsByMonth(
+      @Param("userId") Long userId,
+      @Param("monthStart") LocalDate monthStart,
+      @Param("nextMonthStart") LocalDate nextMonthStart);
+
+  Long getUndatedSpentByMonth(
+      @Param("userId") Long userId,
+      @Param("createdAtStart") LocalDateTime createdAtStart,
+      @Param("createdAtEnd") LocalDateTime createdAtEnd);
+
   List<ExpenseDetail> findRecentByMonth(
       @Param("userId") Long userId,
       @Param("monthStart") LocalDate monthStart,
       @Param("nextMonthStart") LocalDate nextMonthStart,
       @Param("createdAtStart") LocalDateTime createdAtStart,
       @Param("createdAtEnd") LocalDateTime createdAtEnd);
+
+  Long getHistoryFilteredTotal(
+      @Param("userId") Long userId,
+      @Param("monthStart") LocalDate monthStart,
+      @Param("nextMonthStart") LocalDate nextMonthStart,
+      @Param("createdAtStart") LocalDateTime createdAtStart,
+      @Param("createdAtEnd") LocalDateTime createdAtEnd,
+      @Param("categoryId") Long categoryId,
+      @Param("undated") boolean undated);
+
+  List<ExpenseDetail> findHistory(
+      @Param("userId") Long userId,
+      @Param("monthStart") LocalDate monthStart,
+      @Param("nextMonthStart") LocalDate nextMonthStart,
+      @Param("createdAtStart") LocalDateTime createdAtStart,
+      @Param("createdAtEnd") LocalDateTime createdAtEnd,
+      @Param("categoryId") Long categoryId,
+      @Param("undated") boolean undated,
+      @Param("cursor") HistoryCursor cursor,
+      @Param("limit") int limit);
 
   Expense findById(
       @Param("userId") Long userId,

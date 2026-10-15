@@ -3,9 +3,9 @@ package com.example.chokokane.service.dashboard;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
+
+import com.example.chokokane.common.time.MonthRange;
 
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,6 @@ import com.example.chokokane.dto.category.CategorySummaryResponse;
 import com.example.chokokane.dto.dashboard.DashboardResponse;
 import com.example.chokokane.dto.dashboard.DashboardStatus;
 import com.example.chokokane.dto.expense.ExpenseResponse;
-import com.example.chokokane.exception.BadRequestException;
 import com.example.chokokane.model.budget.MonthlyBudget;
 import com.example.chokokane.model.expense.ExpenseDetail;
 import com.example.chokokane.repository.budget.MonthlyBudgetRepository;
@@ -64,26 +63,16 @@ public class DashboardService {
   }
 
   public DashboardResponse getDashboard(Long userId, YearMonth month) {
-    ZoneId jst = ZoneId.of("Asia/Tokyo");
 
-    LocalDate today = LocalDate.now(jst);
 
-    if (month.isAfter(YearMonth.from(today))) {
-      throw new BadRequestException("未来の月は照会できません。");
-    }
+    MonthRange range = MonthRange.of(month);
+    LocalDate today = range.today();
+    LocalDate monthStart = range.monthStart();
+    LocalDate nextMonthStart = range.nextMonthStart();
+    LocalDateTime createdAtStart = range.createdAtStart();
+    LocalDateTime createdAtEnd = range.createdAtEnd();
 
-    LocalDate monthStart = month.atDay(1);
-    LocalDate nextMonthStart = month.plusMonths(1).atDay(1);
-    LocalDateTime createdAtStart = monthStart
-        .atStartOfDay(jst)
-        .withZoneSameInstant(ZoneOffset.UTC)
-        .toLocalDateTime();
-    LocalDateTime createdAtEnd = nextMonthStart
-        .atStartOfDay(jst)
-        .withZoneSameInstant(ZoneOffset.UTC)
-        .toLocalDateTime();
-
-    boolean isCurrentMonth = month.equals(YearMonth.from(today));
+    boolean isCurrentMonth = range.isCurrentMonth();
 
     MonthlyBudget monthlyBudget = monthlyBudgetRepository.findByUserIdAndMonth(userId, monthStart);
 

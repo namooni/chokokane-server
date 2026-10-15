@@ -7,8 +7,11 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.example.chokokane.mapper.expense.ExpenseMapper;
+import com.example.chokokane.model.analytics.CategoryExpenseTotal;
+import com.example.chokokane.model.analytics.DailyCategoryExpenseTotal;
 import com.example.chokokane.model.expense.Expense;
 import com.example.chokokane.model.expense.ExpenseDetail;
+import com.example.chokokane.model.history.HistoryCursor;
 
 @Repository
 public class MyBatisExpenseRepository implements ExpenseRepository {
@@ -80,6 +83,43 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
   }
 
   @Override
+  public List<CategoryExpenseTotal> getCategoryTotalByMonth(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd) {
+    return expenseMapper.getCategoryTotalByMonth(
+        userId,
+        monthStart,
+        nextMonthStart,
+        createdAtStart,
+        createdAtEnd);
+  }
+
+  @Override
+  public List<DailyCategoryExpenseTotal> getDailyCategoryTotalsByMonth(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart) {
+    return expenseMapper.getDailyCategoryTotalsByMonth(
+        userId,
+        monthStart,
+        nextMonthStart);
+  }
+
+  @Override
+  public Long getUndatedSpentByMonth(
+      Long userId,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd) {
+    return expenseMapper.getUndatedSpentByMonth(
+        userId,
+        createdAtStart,
+        createdAtEnd);
+  }
+
+  @Override
   public List<ExpenseDetail> findRecentByMonth(
       Long userId,
       LocalDate monthStart,
@@ -99,6 +139,48 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
       Long userId,
       LocalDate today) {
     return expenseMapper.getTodaySpent(userId, today);
+  }
+
+  @Override
+  public Long getHistoryFilteredTotal(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd,
+      Long categoryId,
+      boolean undated) {
+    return expenseMapper.getHistoryFilteredTotal(
+        userId,
+        monthStart,
+        nextMonthStart,
+        createdAtStart,
+        createdAtEnd,
+        categoryId,
+        undated);
+  }
+
+  @Override
+  public List<ExpenseDetail> findHistory(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd,
+      Long categoryId,
+      boolean undated,
+      HistoryCursor cursor,
+      int limit) {
+    return expenseMapper.findHistory(
+        userId,
+        monthStart,
+        nextMonthStart,
+        createdAtStart,
+        createdAtEnd,
+        categoryId,
+        undated,
+        cursor,
+        limit);
   }
 
   @Override

@@ -29,6 +29,61 @@
         </where>
     </sql>
 
+    <sql id="historyFilters">
+        WHERE e.user_id = #{userId}
+            AND (
+                    (
+                        e.expense_date >= #{monthStart}
+                        AND e.expense_date &lt; #{nextMonthStart}
+                    )
+                    OR
+                    (
+                        e.expense_date IS NULL
+                        AND e.created_at >= #{createdAtStart}
+                        AND e.created_at &lt; #{createdAtEnd}
+                    )
+            )
+
+        <if test="categoryId != null">
+            AND e.category_id = #{categoryId}
+        </if>
+
+        <if test="undated">
+            AND e.expense_date IS NULL
+        </if>
+    </sql>
+
+    <sql id="historyAfterCreatedAt">
+        (
+            e.created_at &lt; #{cursor.createdAt}
+            OR (
+                e.created_at = #{cursor.createdAt}
+                AND e.id &lt; #{cursor.id}
+            )
+        )
+    </sql>
+
+    <sql id="historyAfterTime">
+        <choose>
+            <when test="cursor.expenseTime != null">
+                (
+                    e.expense_time IS NULL
+                    OR e.expense_time &lt; #{cursor.expenseTime}
+                    OR (
+                        e.expense_time = #{cursor.expenseTime}
+                        AND <include refid="historyAfterCreatedAt" />
+                    )
+                )
+            </when>
+            <otherwise>
+                (
+                    e.expense_time IS NULL
+                    AND <include refid="historyAfterCreatedAt" />
+                )
+            </otherwise>
+        </choose>
+    </sql>
+
     <resultMap
         id="expenseDetailResultMap"
         type="com.example.chokokane.model.expense.ExpenseDetail"
@@ -55,6 +110,27 @@
         <result column="expense_date" property="expenseDate" />
         <result column="expense_time" property="expenseTime" />
         <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <resultMap
+        id="categoryExpenseTotalResultMap"
+        type="com.example.chokokane.model.analytics.CategoryExpenseTotal"
+    >
+        <id column="category_id" property="categoryId" />
+        <result column="category_name" property="categoryName" />
+        <result column="category_color" property="categoryColor" />
+        <result column="total_amount" property="totalAmount" />
+    </resultMap>
+
+    <resultMap
+        id="dailyCategoryExpenseTotalResultMap"
+        type="com.example.chokokane.model.analytics.DailyCategoryExpenseTotal"
+    >
+        <result column="expense_date" property="expenseDate" />
+        <result column="category_id" property="categoryId" />
+        <result column="category_name" property="categoryName" />
+        <result column="category_color" property="categoryColor" />
+        <result column="total_amount" property="totalAmount" />
     </resultMap>
 
     <insert
@@ -170,6 +246,67 @@
     </select>
 
     <select
+        id="getCategoryTotalByMonth"
+        resultMap="categoryExpenseTotalResultMap"
+    >
+        SELECT
+            e.category_id,
+            c.name AS category_name,
+            c.color AS category_color,
+            SUM(e.amount) AS total_amount
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        WHERE e.user_id = #{userId}
+            AND (
+                    (
+                        e.expense_date >= #{monthStart}
+                        AND e.expense_date &lt; #{nextMonthStart}
+                    )
+                    OR
+                    (
+                        e.expense_date IS NULL
+                        AND e.created_at >= #{createdAtStart}
+                        AND e.created_at &lt; #{createdAtEnd}
+                    )
+            )
+        GROUP BY e.category_id, c.name, c.color
+        HAVING SUM(e.amount) > 0
+        ORDER BY total_amount DESC, e.category_id ASC
+    </select>
+
+    <select
+        id="getDailyCategoryTotalsByMonth"
+        resultMap="dailyCategoryExpenseTotalResultMap"
+    >
+        SELECT
+            e.expense_date,
+            e.category_id,
+            c.name AS category_name,
+            c.color AS category_color,
+            SUM(e.amount) AS total_amount
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        WHERE e.user_id = #{userId}
+            AND e.expense_date >= #{monthStart}
+            AND e.expense_date &lt; #{nextMonthStart}
+        GROUP BY e.expense_date, e.category_id, c.name, c.color
+        HAVING SUM(e.amount) > 0
+        ORDER BY e.expense_date ASC, e.category_id ASC
+    </select>
+
+    <select
+        id="getUndatedSpentByMonth"
+        resultType="java.lang.Long"
+    >
+        SELECT COALESCE(SUM(e.amount), 0)
+        FROM expenses e
+        WHERE e.user_id = #{userId}
+            AND e.expense_date IS NULL
+            AND e.created_at >= #{createdAtStart}
+            AND e.created_at &lt; #{createdAtEnd}
+    </select>
+
+    <select
         id="findRecentByMonth"
         resultMap="expenseDetailResultMap"
     >
@@ -201,6 +338,59 @@
             )
         ORDER BY e.created_at DESC, e.id DESC
         LIMIT 5
+    </select>
+
+    <select
+        id="getHistoryFilteredTotal"
+        resultType="java.lang.Long"
+    >
+        SELECT COALESCE(SUM(e.amount), 0)
+        FROM expenses e
+        <include refid="historyFilters" />
+    </select>
+
+    <select id="findHistory" resultMap="expenseDetailResultMap">
+        SELECT
+            e.id,
+            e.amount,
+            e.category_id,
+            c.name AS category_name,
+            c.color AS category_color,
+            e.memo,
+            e.expense_date,
+            e.expense_time,
+            e.created_at
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        <include refid="historyFilters" />
+
+        <if test="cursor != null">
+            AND (
+                <choose>
+                    <when test="cursor.expenseDate != null">
+                        e.expense_date IS NULL
+                        OR e.expense_date &lt; #{cursor.expenseDate}
+                        OR (
+                            e.expense_date = #{cursor.expenseDate}
+                            AND <include refid="historyAfterTime" />
+                        )
+                    </when>
+                    <otherwise>
+                        e.expense_date IS NULL
+                        AND <include refid="historyAfterTime" />
+                    </otherwise>
+                </choose>
+            )
+        </if>
+
+        ORDER BY
+            e.expense_date IS NULL ASC,
+            e.expense_date DESC,
+            e.expense_time IS NULL ASC,
+            e.expense_time DESC,
+            e.created_at DESC,
+            e.id DESC
+        LIMIT #{limit}
     </select>
 
     <select
