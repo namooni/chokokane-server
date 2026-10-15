@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import lombok.Getter;
+
+@Getter
 public class Expense {
   private Long id;
   private int amount;
@@ -30,36 +33,8 @@ public class Expense {
     this.createdAt = createdAt;
   }
 
-  public Long getId() {
-    return id;
-  }
-
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public int getAmount() {
-    return amount;
-  }
-
-  public Long getCategoryId() {
-    return categoryId;
-  }
-
-  public String getMemo() {
-    return memo;
-  }
-
-  public LocalDate getExpenseDate() {
-    return expenseDate;
-  }
-
-  public LocalTime getExpenseTime() {
-    return expenseTime;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
   }
 
   public void update(

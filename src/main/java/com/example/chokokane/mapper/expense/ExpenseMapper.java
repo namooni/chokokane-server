@@ -1,5 +1,7 @@
 package com.example.chokokane.mapper.expense;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -35,6 +37,24 @@ public interface ExpenseMapper {
       @Param("categoryIds") List<Long> categoryIds,
       @Param("minAmount") Integer minAmount,
       @Param("maxAmount") Integer maxAmount);
+
+  Long getMonthlySpent(
+      @Param("userId") Long userId,
+      @Param("monthStart") LocalDate monthStart,
+      @Param("nextMonthStart") LocalDate nextMonthStart,
+      @Param("createdAtStart") LocalDateTime createdAtStart,
+      @Param("createdAtEnd") LocalDateTime createdAtEnd);
+
+  Long getTodaySpent(
+      @Param("userId") Long userId,
+      @Param("today") LocalDate today);
+
+  List<ExpenseDetail> findRecentByMonth(
+      @Param("userId") Long userId,
+      @Param("monthStart") LocalDate monthStart,
+      @Param("nextMonthStart") LocalDate nextMonthStart,
+      @Param("createdAtStart") LocalDateTime createdAtStart,
+      @Param("createdAtEnd") LocalDateTime createdAtEnd);
 
   Expense findById(
       @Param("userId") Long userId,

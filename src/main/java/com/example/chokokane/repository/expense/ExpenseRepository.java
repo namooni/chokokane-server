@@ -1,5 +1,7 @@
 package com.example.chokokane.repository.expense;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.chokokane.model.expense.Expense;
@@ -27,6 +29,24 @@ public interface ExpenseRepository {
       List<Long> categoryIds,
       Integer minAmount,
       Integer maxAmount);
+
+  Long getMonthlySpent(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd);
+
+  Long getTodaySpent(
+      Long userId,
+      LocalDate today);
+
+  List<ExpenseDetail> findRecentByMonth(
+      Long userId,
+      LocalDate monthStart,
+      LocalDate nextMonthStart,
+      LocalDateTime createdAtStart,
+      LocalDateTime createdAtEnd);
 
   Expense findById(Long userId, Long id);
 
