@@ -25,6 +25,7 @@ import jakarta.validation.Valid;
 @Tag(name = "Category", description = "카테고리 관리")
 @RestController
 public class CategoryController {
+
   private CategoryService categoryService;
 
   public CategoryController(CategoryService categoryService) {

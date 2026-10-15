@@ -28,7 +28,7 @@ public class MonthlyBudgetController {
     this.monthlyBudgetService = monthlyBudgetService;
   }
 
-  @Operation(summary = "", description = "")
+  @Operation(summary = "예산 저장", description = "예산을 저장합니다.")
   @PutMapping("/budget/{month}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void saveBudget(
