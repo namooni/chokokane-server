@@ -49,6 +49,12 @@
             WHERE id = #{userId}
         </select>
 
+        <update id="updatePassword">
+            UPDATE users
+            SET password = #{encodedPassword}
+            WHERE id = #{userId}
+        </update>
+
         <select
             id="deleteMe"
             resultType="int"
