@@ -23,4 +23,6 @@ public interface CategoryRepository {
   int softDelete(Long categoryId, Long userId);
 
   int restore(Long categoryId, Long userId, String color);
+
+  int deleteAllByUserId(Long userId);
 }

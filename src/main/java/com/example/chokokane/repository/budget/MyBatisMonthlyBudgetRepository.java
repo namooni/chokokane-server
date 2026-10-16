@@ -30,4 +30,11 @@ public class MyBatisMonthlyBudgetRepository implements MonthlyBudgetRepository {
       Integer amount) {
     return monthlyBudgetMapper.upsert(userId, budgetMonth, amount);
   }
+
+  @Override
+  public int deleteAllByUserId(
+    Long userId
+  ) {
+    return monthlyBudgetMapper.deleteAllByUserId(userId);
+  }
 }

@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+import com.example.chokokane.repository.user.UserRepository;
+
 @Configuration
 public class JwtConfig {
 
@@ -42,15 +44,17 @@ public class JwtConfig {
 
   @Bean
   @Primary
-  JwtDecoder jwtDecoder() {
+  JwtDecoder jwtDecoder(UserRepository userRepository) {
     SecretKey key = getSecretKey();
 
     NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).build();
 
     OAuth2TokenValidator<Jwt> defaultValidator = JwtValidators.createDefault();
+
     OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
         defaultValidator,
-        new AccessTokenValidator());
+        new AccessTokenValidator(),
+        new ExistingUserValidator(userRepository));
 
     decoder.setJwtValidator(validator);
 

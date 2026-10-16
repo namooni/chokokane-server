@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chokokane.dto.auth.RefreshResult;
 import com.example.chokokane.dto.user.ChangePasswordRequest;
+import com.example.chokokane.dto.user.DeleteAccountRequest;
 import com.example.chokokane.dto.user.LoginRequest;
 import com.example.chokokane.dto.user.LoginResult;
 import com.example.chokokane.dto.user.SignupRequest;
@@ -30,6 +31,9 @@ import com.example.chokokane.exception.NotFoundException;
 import com.example.chokokane.model.auth.RefreshToken;
 import com.example.chokokane.model.user.User;
 import com.example.chokokane.repository.auth.RefreshTokenRepository;
+import com.example.chokokane.repository.budget.MonthlyBudgetRepository;
+import com.example.chokokane.repository.category.CategoryRepository;
+import com.example.chokokane.repository.expense.ExpenseRepository;
 import com.example.chokokane.repository.user.UserRepository;
 import com.example.chokokane.service.category.CategoryService;
 
@@ -40,6 +44,9 @@ public class UserService {
   private final JwtEncoder jwtEncoder;
   private final JwtDecoder refreshJwtDecoder;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final ExpenseRepository expenseRepository;
+  private final CategoryRepository categoryRepository;
+  private final MonthlyBudgetRepository monthlyBudgetRepository;
 
   private final CategoryService categoryService;
 
@@ -49,13 +56,19 @@ public class UserService {
       JwtEncoder jwtEncoder,
       @Qualifier("refreshJwtDecoder") JwtDecoder refreshJwtDecoder,
       RefreshTokenRepository refreshTokenRepository,
-      CategoryService categoryService) {
+      CategoryService categoryService,
+      ExpenseRepository expenseRepository,
+      CategoryRepository categoryRepository,
+      MonthlyBudgetRepository monthlyBudgetRepository) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtEncoder = jwtEncoder;
     this.refreshJwtDecoder = refreshJwtDecoder;
     this.refreshTokenRepository = refreshTokenRepository;
     this.categoryService = categoryService;
+    this.expenseRepository = expenseRepository;
+    this.categoryRepository = categoryRepository;
+    this.monthlyBudgetRepository = monthlyBudgetRepository;
   }
 
   @Transactional
@@ -200,8 +213,38 @@ public class UserService {
     refreshTokenRepository.deleteByUserId(userId);
   }
 
-  public int deleteMe(Long userId) {
-    return userRepository.deleteMe(userId);
+  @Transactional
+  public void deleteMe(Long userId, DeleteAccountRequest request) {
+    String password = request.password();
+
+    if (password == null || password.isBlank()) {
+      throw new BadRequestException("パスワードを入力してください。");
+    }
+
+    if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
+      throw new BadRequestException("パスワードが正しくありません。");
+    }
+
+    User user = userRepository.findById(userId);
+
+    if (user == null) {
+      throw new NotFoundException("アカウントが見つかりません。");
+    }
+
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+      throw new BadRequestException("パスワードが正しくありません。");
+    }
+
+    expenseRepository.deleteAllByUserId(userId);
+    categoryRepository.deleteAllByUserId(userId);
+    monthlyBudgetRepository.deleteAllByUserId(userId);
+    refreshTokenRepository.deleteByUserId(userId);
+
+    int deleted = userRepository.deleteMe(userId);
+
+    if (deleted != 1) {
+      throw new IllegalStateException("Account deletion failed.");
+    }
   }
 
   public RefreshResult refresh(String refreshToken) {
