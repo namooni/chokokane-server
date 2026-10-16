@@ -18,4 +18,7 @@ public interface MonthlyBudgetMapper {
       @Param("userId") Long userId,
       @Param("budgetMonth") LocalDate budgetMonth,
       @Param("amount") Integer amount);
+
+  int deleteAllByUserId(
+      @Param("userId") Long userId);
 }

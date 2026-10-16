@@ -104,6 +104,9 @@ public interface ExpenseMapper {
       @Param("userId") Long userId,
       @Param("expense") Expense expense);
 
+  int deleteAllByUserId(
+      @Param("userId") Long userId);
+
   int delete(
       @Param("userId") Long userId,
       @Param("id") Long id);

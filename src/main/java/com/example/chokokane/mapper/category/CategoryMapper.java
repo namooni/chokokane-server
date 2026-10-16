@@ -36,4 +36,7 @@ public interface CategoryMapper {
       @Param("categoryId") Long categoryId,
       @Param("userId") Long userId,
       @Param("color") String color);
+
+  int deleteAllByUserId(
+      @Param("userId") Long userId);
 }

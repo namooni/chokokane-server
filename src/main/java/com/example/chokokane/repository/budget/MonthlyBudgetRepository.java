@@ -14,4 +14,6 @@ public interface MonthlyBudgetRepository {
       Long userId,
       LocalDate budgetMonth,
       Integer amount);
+
+  int deleteAllByUserId(Long userId);
 }

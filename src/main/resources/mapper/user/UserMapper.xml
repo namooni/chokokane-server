@@ -49,11 +49,14 @@
             WHERE id = #{userId}
         </select>
 
-        <select
-            id="deleteMe"
-            resultType="int"
-        >
+        <update id="updatePassword">
+            UPDATE users
+            SET password = #{encodedPassword}
+            WHERE id = #{userId}
+        </update>
+
+        <delete id="deleteMe">
             DELETE FROM users
             WHERE id = #{userId}
-        </select>
+        </delete>
     </mapper>

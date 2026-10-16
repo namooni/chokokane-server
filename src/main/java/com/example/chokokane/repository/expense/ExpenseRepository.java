@@ -94,5 +94,7 @@ public interface ExpenseRepository {
 
   int update(Long userId, Expense expense);
 
+  int deleteAllByUserId(Long userId);
+
   int deleteById(Long userId, Long id);
 }

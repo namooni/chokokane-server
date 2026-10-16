@@ -30,6 +30,11 @@ public class MyBatisUserRepository implements UserRepository {
   }
 
   @Override
+  public int updatePassword(Long userId, String encodedPassword) {
+    return userMapper.updatePassword(userId, encodedPassword);
+  }
+
+  @Override
   public int deleteMe(Long userId) {
     return userMapper.deleteMe(userId);
   }

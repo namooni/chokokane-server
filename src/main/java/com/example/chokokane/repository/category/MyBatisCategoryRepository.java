@@ -50,4 +50,9 @@ public class MyBatisCategoryRepository implements CategoryRepository {
   public int restore(Long categoryId, Long userId, String color) {
     return categoryMapper.restore(categoryId, userId, color);
   }
+
+  @Override
+  public int deleteAllByUserId(Long userId) {
+    return categoryMapper.deleteAllByUserId(userId);
+  }
 }

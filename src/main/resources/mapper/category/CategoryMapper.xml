@@ -104,4 +104,9 @@
             AND is_system = 0
             AND deleted_at IS NOT NULL
     </update>
+
+    <delete id="deleteAllByUserId">
+        DELETE FROM categories
+        WHERE user_id = #{userId}
+    </delete>
 </mapper>

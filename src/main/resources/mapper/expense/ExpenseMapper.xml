@@ -422,6 +422,11 @@
             AND user_id = #{userId}
     </update>
 
+    <delete id="deleteAllByUserId">
+        DELETE FROM expenses
+        WHERE user_id = #{userId}
+    </delete>
+
     <delete id="delete">
         DELETE FROM expenses
         WHERE id = #{id}
