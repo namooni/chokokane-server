@@ -1,5 +1,6 @@
 package com.example.chokokane.service.user;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -16,13 +17,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chokokane.dto.auth.RefreshResult;
+import com.example.chokokane.dto.user.ChangePasswordRequest;
 import com.example.chokokane.dto.user.LoginRequest;
 import com.example.chokokane.dto.user.LoginResult;
 import com.example.chokokane.dto.user.SignupRequest;
 import com.example.chokokane.dto.user.UserResponse;
+import com.example.chokokane.exception.BadRequestException;
 import com.example.chokokane.exception.ConflictException;
 import com.example.chokokane.exception.InvalidRefreshTokenException;
 import com.example.chokokane.exception.LoginFailedException;
+import com.example.chokokane.exception.NotFoundException;
 import com.example.chokokane.model.auth.RefreshToken;
 import com.example.chokokane.model.user.User;
 import com.example.chokokane.repository.auth.RefreshTokenRepository;
@@ -100,7 +104,7 @@ public class UserService {
         .subject(user.getId().toString())
         .claim("type", "access")
         .issuedAt(now)
-        .expiresAt(now.plusSeconds(3600))
+        .expiresAt(now.plusSeconds(900))
         .build();
 
     String accessToken = jwtEncoder
@@ -146,6 +150,56 @@ public class UserService {
     return new UserResponse(user.getId(), user.getName(), user.getEmail());
   }
 
+  @Transactional
+  public void changePassword(
+      Long userId,
+      ChangePasswordRequest request) {
+    String currentPassword = request.currentPassword();
+    String newPassword = request.newPassword();
+
+    if (currentPassword == null || currentPassword.isBlank()) {
+      throw new BadRequestException(
+          "現在のパスワードを入力してください。");
+    }
+
+    if (newPassword == null || newPassword.isBlank()) {
+      throw new BadRequestException(
+          "新しいパスワードを入力してください。");
+    }
+
+    if (currentPassword.getBytes(StandardCharsets.UTF_8).length > 72) {
+      throw new BadRequestException(
+          "現在のパスワードが正しくありません。");
+    }
+
+    if (newPassword.getBytes(StandardCharsets.UTF_8).length > 72) {
+      throw new BadRequestException(
+          "新しいパスワードはUTF-8で 72バイト以内にしてください。");
+    }
+
+    User user = userRepository.findById(userId);
+
+    if (user == null) {
+      throw new NotFoundException(
+          "アカウントが見つかりません。");
+    }
+
+    if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+      throw new BadRequestException(
+          "現在のパスワードが正しくありません。");
+    }
+
+    String encodedPassword = passwordEncoder.encode(newPassword);
+
+    int updated = userRepository.updatePassword(userId, encodedPassword);
+
+    if (updated != 1) {
+      throw new IllegalStateException("Password update failed.");
+    }
+
+    refreshTokenRepository.deleteByUserId(userId);
+  }
+
   public int deleteMe(Long userId) {
     return userRepository.deleteMe(userId);
   }
@@ -180,7 +234,7 @@ public class UserService {
         .subject(userId.toString())
         .claim("type", "access")
         .issuedAt(now)
-        .expiresAt(now.plusSeconds(3600))
+        .expiresAt(now.plusSeconds(900))
         .build();
 
     String accessToken = jwtEncoder

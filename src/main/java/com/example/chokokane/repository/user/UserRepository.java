@@ -10,5 +10,7 @@ public interface UserRepository {
 
   User findById(Long userId);
 
+  int updatePassword(Long userId, String encodedPassword);
+
   int deleteMe(Long userId);
 }

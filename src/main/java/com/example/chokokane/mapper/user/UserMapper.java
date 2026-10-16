@@ -14,5 +14,9 @@ public interface UserMapper {
 
   User findById(@Param("userId") Long userId);
 
+  int updatePassword(
+      @Param("userId") Long userId,
+      @Param("encodedPassword") String encodedPassword);
+
   int deleteMe(@Param("userId") Long userId);
 }
