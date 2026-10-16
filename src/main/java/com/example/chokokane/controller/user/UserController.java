@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.chokokane.dto.auth.RefreshResult;
 import com.example.chokokane.dto.auth.RefreshTokenResponse;
 import com.example.chokokane.dto.user.ChangePasswordRequest;
+import com.example.chokokane.dto.user.DeleteAccountRequest;
 import com.example.chokokane.dto.user.LoginRequest;
 import com.example.chokokane.dto.user.LoginResponse;
 import com.example.chokokane.dto.user.LoginResult;
@@ -127,9 +128,19 @@ public class UserController {
 
   @Operation(summary = "탈퇴", description = "유저를 삭제합니다.")
   @DeleteMapping("/me")
-  public int deleteMe(Authentication authentication) {
+  public ResponseEntity<Void> deleteMe(
+      Authentication authentication,
+      @Valid @RequestBody DeleteAccountRequest request) {
+
     Long userId = Long.valueOf(authentication.getName());
 
-    return userService.deleteMe(userId);
+    userService.deleteMe(userId, request);
+
+    ResponseCookie cookie = refreshTokenCookieProvider.delete();
+
+    return ResponseEntity
+        .noContent()
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .build();
   }
 }

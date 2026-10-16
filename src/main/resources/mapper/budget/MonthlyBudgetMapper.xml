@@ -47,4 +47,9 @@
             amount = #{amount},
             updated_at = UTC_TIMESTAMP()
     </insert>
+
+    <delete id="deleteAllByUserId">
+        DELETE FROM monthly_budgets
+        WHERE user_id = #{userId}
+    </delete>
 </mapper>

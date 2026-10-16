@@ -200,6 +200,11 @@ public class MyBatisExpenseRepository implements ExpenseRepository {
   }
 
   @Override
+  public int deleteAllByUserId(Long userId) {
+    return expenseMapper.deleteAllByUserId(userId);
+  }
+
+  @Override
   public int deleteById(Long userId, Long id) {
     return expenseMapper.delete(userId, id);
   }

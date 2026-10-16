@@ -55,11 +55,8 @@
             WHERE id = #{userId}
         </update>
 
-        <select
-            id="deleteMe"
-            resultType="int"
-        >
+        <delete id="deleteMe">
             DELETE FROM users
             WHERE id = #{userId}
-        </select>
+        </delete>
     </mapper>
